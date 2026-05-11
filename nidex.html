@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>臺北市孔洞檢測清單 | 高中專題成果</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ghibli-sky: #1a2a6c;
+            --ghibli-grass: #4e6e5d;
+            --ghibli-paper: #fdf6e3;
+            --ghibli-accent: #d4a373;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--ghibli-sky);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* 吉卜力風格夜晚星空背景 */
+        .night-sky {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            box-shadow: 0 0 10px white;
+            animation: shoot 5s infinite;
+            opacity: 0;
+        }
+
+        @keyframes shoot {
+            0% { transform: translateX(0) translateY(0); opacity: 1; }
+            10% { transform: translateX(300px) translateY(300px); opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        /* 內容容器 - 手繪紙張質感 */
+        .paper-container {
+            background-color: var(--ghibli-paper);
+            background-image: url('https://www.transparenttextures.com/patterns/parchment.png');
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid #e0d5b1;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1, h2 {
+            font-family: 'Zhi Mang Xing', cursive;
+            color: #5d4037;
+        }
+
+        .title-section {
+            text-align: center;
+            border-bottom: 2px dashed #d4a373;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+        }
+
+        /* 裝飾性草地與插畫感 */
+        .decoration-grass {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: var(--ghibli-grass);
+            clip-path: ellipse(60% 100% at 50% 100%);
+            z-index: 5;
+            opacity: 0.8;
+        }
+
+        /* 按鈕樣式 */
+        .btn-ghibli {
+            background: #7b9e89;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            transition: all 0.3s;
+            border: 2px solid #5a7d68;
+            box-shadow: 0 4px 0 #4a6d58;
+            display: inline-block;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-ghibli:hover {
+            background: #8fb19c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #4a6d58;
+        }
+
+        .btn-ghibli:active {
+            transform: translateY(2px);
+            box-shadow: 0 0px 0 #4a6d58;
+        }
+
+        .custom-card {
+            background: rgba(255, 255, 255, 0.5);
+            border-left: 5px solid var(--ghibli-accent);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .status-badge {
+            background: #d4a373;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        footer {
+            text-align: center;
+            color: #eee;
+            margin-top: 20px;
+            padding-bottom: 40px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="night-sky" id="sky">
+        <!-- JS 將在此生成星星 -->
+    </div>
+    <div class="decoration-grass"></div>
+
+    <div class="container mx-auto px-4">
+        <div class="paper-container">
+            <header class="title-section">
+                <h1 class="text-5xl mb-2">臺北市孔洞檢測清單</h1>
+                <p class="text-gray-600 italic">高中期末專題成果展示：守護城市道路的隱形之眼</p>
+            </header>
+
+            <main>
+                <section class="mb-8">
+                    <h2 class="text-3xl mb-4">● 專案簡介</h2>
+                    <p class="leading-relaxed text-gray-700">
+                        在臺北市繁華的街道下，佈滿了複雜的排水與電力系統。由於氣候變遷與都市老化，道路孔洞（如人孔蓋周邊、排水口）的安全性日益重要。
+                        本專題結合了物聯網（IoT）與影像辨識技術，透過自主開發的巡檢系統，對臺北市重點區域進行地毯式孔洞巡測，並建立數位化清單，旨在減少機車族因道路不平造成的事故。
+                    </p>
+                </section>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="custom-card">
+                        <h3 class="font-bold text-xl mb-2">核心技術</h3>
+                        <ul class="list-disc list-inside text-gray-600">
+                            <li>YOLOv8 實時物件偵測</li>
+                            <li>GPS 地理位置自動標註</li>
+                            <li>雲端資料庫整合系統</li>
+                            <li>響應式前端管理介面</li>
+                        </ul>
+                    </div>
+                    <div class="custom-card">
+                        <h3 class="font-bold text-xl mb-2">檢測指標</h3>
+                        <ul class="list-disc list-inside text-gray-600">
+                            <li>孔洞邊緣沉陷深度</li>
+                            <li>人孔蓋磨耗平滑度</li>
+                            <li>排水格柵堵塞情況</li>
+                            <li>周邊路面龜裂率</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <section class="mt-8">
+                    <h2 class="text-3xl mb-4">● 執行成果</h2>
+                    <div class="bg-white p-4 rounded-lg shadow-inner mb-6 border border-gray-200">
+                        <table class="w-full text-left text-gray-700">
+                            <thead>
+                                <tr class="border-bottom border-gray-300">
+                                    <th class="py-2">區域</th>
+                                    <th class="py-2">檢測數量</th>
+                                    <th class="py-2">異常率</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="py-2">大安區</td>
+                                    <td class="py-2">124 個</td>
+                                    <td class="py-2"><span class="status-badge">4.2%</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2">士林區</td>
+                                    <td class="py-2">98 個</td>
+                                    <td class="py-2"><span class="status-badge">6.1%</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2">信義區</td>
+                                    <td class="py-2">156 個</td>
+                                    <td class="py-2"><span class="status-badge">3.8%</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="text-center mt-12 py-8 border-t border-gray-200">
+                    <h2 class="text-2xl mb-6">獲取專案執行檔</h2>
+                    <p class="text-gray-500 mb-6">您可以下載我們的偵測系統模擬器，親自體驗 AI 巡檢的過程。</p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <a href="#" class="btn-ghibli" id="downloadBtn">
+                            下載專案執行檔 (.exe)
+                        </a>
+                        <a href="#" class="btn-ghibli" style="background: #a3b18a; border-color: #588157; box-shadow: 0 4px 0 #3a5a40;">
+                            查看技術報告 (PDF)
+                        </a>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 臺北市立高中專題研習小組 - 指導老師：王大明</p>
+    </footer>
+
+    <!-- 訊息提示視窗 (取代 alert) -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl max-w-sm w-full mx-4 text-center">
+            <h3 class="text-xl font-bold mb-4">正在準備下載...</h3>
+            <p class="text-gray-600 mb-6">正在從伺服器封裝專案執行檔，請稍候。</p>
+            <button onclick="closeModal()" class="btn-ghibli">確定</button>
+        </div>
+    </div>
+
+    <script>
+        // 生成夜晚背景星星
+        function createStars() {
+            const sky = document.getElementById('sky');
+            const starCount = 150;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const size = Math.random() * 3;
+                const top = Math.random() * 100;
+                const left = Math.random() * 100;
+                const duration = 2 + Math.random() * 3;
+                const delay = Math.random() * 5;
+
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.top = `${top}%`;
+                star.style.left = `${left}%`;
+                star.style.setProperty('--duration', `${duration}s`);
+                star.style.animationDelay = `${delay}s`;
+
+                sky.appendChild(star);
+            }
+
+            // 生成偶爾出現的流星
+            setInterval(() => {
+                const shootingStar = document.createElement('div');
+                shootingStar.className = 'shooting-star';
+                shootingStar.style.top = `${Math.random() * 50}%`;
+                shootingStar.style.left = `${Math.random() * 50}%`;
+                sky.appendChild(shootingStar);
+                
+                setTimeout(() => {
+                    shootingStar.remove();
+                }, 5000);
+            }, 8000);
+        }
+
+        // 下載按鈕處理
+        const downloadBtn = document.getElementById('downloadBtn');
+        const modal = document.getElementById('modal');
+
+        downloadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.style.display = 'flex';
+        });
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        window.onload = createStars;
+    </script>
+</body>
+</html>
