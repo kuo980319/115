@@ -1,0 +1,10 @@
+import csv
+import urllib.request
+url = 'https://quality.data.gov.tw/dq_download_csv.php?nid=174035&md5_url=e9dc6e43f45e1ae3a489ec9034d0f192'
+webpage = urllib.request.urlopen(url)  #開啟網頁
+data = csv.reader(webpage.read().decode('utf-8').splitlines())  #讀取資料到data陣列中
+a = input("請輸入項次     ")
+for i in data:
+  if a in i[0]:
+    print('年度:',i[1],'孔洞代碼->',i[2],'縣市別',i[3],'行政區',i[4])
+input("按下 Enter 鍵結束程式...")
