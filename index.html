@@ -229,13 +229,14 @@
                 </section>
 
                 <section class="text-center mt-12 py-8 border-t border-gray-200">
-                    <h2 class="text-2xl mb-6">執行專案系統</h2>
-                    <p class="text-gray-500 mb-6">點擊下方按鈕即可即時連線政府資料庫，線上執行巡檢清單查詢程式。</p>
+                    <h2 class="text-2xl mb-6">獲取專案執行檔</h2>
+                    <p class="text-gray-500 mb-6">您可以下載我們的偵測系統獨立執行檔，直接在 Windows 系統中執行查詢。</p>
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
                         
-                        <button id="runBtn" class="btn-ghibli w-full sm:w-auto">
-                            🚀 立即線上執行專案
-                        </button>
+                        <!-- 修改後的按鈕：設定為直接下載同資料夾底下的 111.exe -->
+                        <a href="111.exe" download="111.exe" id="downloadBtn" class="btn-ghibli w-full sm:w-auto">
+                            💾 下載專案執行檔 (111.exe)
+                        </a>
 
                         <a href="#" class="btn-ghibli w-full sm:w-auto" style="background: #a3b18a; border-color: #588157; box-shadow: 0 4px 0 #3a5a40;">
                             查看技術報告 (PDF)
@@ -250,34 +251,16 @@
         <p>&copy; 2024 臺北市立高中專題研習小組 - 指導老師：王大明</p>
     </footer>
 
-    <div id="runModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-[#fdf6e3] border-2 border-[#e0d5b1] rounded-xl max-w-2xl w-full p-6 relative shadow-2xl" style="background-image: url('https://www.transparenttextures.com/patterns/parchment.png');">
-            
-            <div class="border-b-2 border-dashed border-[#d4a373] pb-3 mb-4 flex justify-between items-center">
-                <h3 class="text-2xl font-bold text-[#5d4037]" style="font-family: 'Zhi Mang Xing', cursive;">💻 巡檢系統核心程式 (線上模擬環境)</h3>
-                <button onclick="closeRunModal()" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
-            </div>
-            
-            <div id="loadingStatus" class="text-center py-8 text-gray-700 font-medium">
-                ⏳ 正在連線至政府公開資料庫並讀取 CSV 資料，請稍候...
-            </div>
-            
-            <div id="querySection" class="hidden flex flex-col gap-4">
-                <p class="text-xs text-gray-500 italic">本區塊正即時模擬運行你的 Python 邏輯（urllib.request 讀取與 csv.reader 走訪篩選）：</p>
-                
-                <div id="consoleOutput" class="bg-white bg-opacity-80 border border-gray-300 p-4 rounded-lg h-64 overflow-y-auto font-mono text-sm shadow-inner text-gray-800">
-                    </div>
-                
-                <div class="flex gap-2 items-center border-t border-gray-200 pt-3">
-                    <label class="text-[#5d4037] font-bold shrink-0">請輸入項次：</label>
-                    <input type="text" id="queryInput" class="border border-gray-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#7b9e89] bg-white" placeholder="例如：1 或 12">
-                    <button id="submitQueryBtn" class="btn-ghibli shrink-0" style="padding: 8px 20px;">送出查詢</button>
-                </div>
-                
-                <div class="text-right">
-                    <button onclick="closeRunModal()" class="text-sm text-gray-500 hover:underline">結束執行並離開</button>
-                </div>
-            </div>
+    <!-- 提示下載的彈窗 -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl max-w-sm w-full mx-4 text-center">
+            <h3 class="text-xl font-bold mb-4">🎉 開始下載 111.exe ！</h3>
+            <p class="text-gray-600 mb-6 text-left text-sm leading-relaxed">
+                瀏覽器已開始下載專案執行檔。<br><br>
+                <span class="text-red-500 font-bold">⚠️ 備註提示：</span><br>
+                請確保您已將打包好的 <code class="bg-gray-100 px-1 rounded">111.exe</code> 檔案，與本網頁檔案放在<span class="text-amber-600 font-bold">同一個資料夾</span>內，使用者點擊時便能順利下載！
+            </p>
+            <button onclick="closeModal()" class="btn-ghibli">確定</button>
         </div>
     </div>
 
@@ -312,128 +295,21 @@
             }, 8000);
         }
 
-        // --- 核心線上執行邏輯 ---
-        let csvData = []; // 儲存解析後的資料陣列
-        const runBtn = document.getElementById('runBtn');
-        const runModal = document.getElementById('runModal');
-        const consoleOutput = document.getElementById('consoleOutput');
-        const queryInput = document.getElementById('queryInput');
-        const submitQueryBtn = document.getElementById('submitQueryBtn');
-        const loadingStatus = document.getElementById('loadingStatus');
-        const querySection = document.getElementById('querySection');
+        // 下載按鈕彈窗處理
+        const downloadBtn = document.getElementById('downloadBtn');
+        const modal = document.getElementById('modal');
 
-        // 點擊「立即線上執行專案」按鈕
-        if (runBtn) {
-            runBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                // 顯示彈窗
-                runModal.classList.remove('hidden');
-                runModal.classList.add('flex');
-                
-                // 初始化狀態
-                consoleOutput.innerHTML = '';
-                querySection.classList.add('hidden');
-                loadingStatus.classList.remove('hidden');
-                loadingStatus.innerHTML = '⏳ 正在連線至政府公開資料庫並讀取 CSV 資料，請稍候...';
-
-                // 如果還沒有下載過資料，就進行非同步下載
-                if (csvData.length === 0) {
-                    try {
-                        const targetUrl = 'https://quality.data.gov.tw/dq_download_csv.php?nid=174035&md5_url=e9dc6e43f45e1ae3a489ec9034d0f192';
-                        // 透過 allorigins 免費代理跳過瀏覽器跨域阻擋 (CORS)
-                        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-                        
-                        const response = await fetch(proxyUrl);
-                        if (!response.ok) throw new Error('網路回應不成功');
-                        const text = await response.text();
-                        
-                        // 解析 CSV 內容 (等同於 Python 的 csv.reader)
-                        const lines = text.split(/\r?\n/);
-                        csvData = lines.map(line => line.split(',').map(cell => cell.trim())).filter(row => row.length > 0 && row[0] !== "");
-                        
-                        loadingStatus.classList.add('hidden');
-                        querySection.classList.remove('hidden');
-                        appendConsole('【資料載入成功！】系統已就緒。', 'success');
-                    } catch (error) {
-                        console.error('CORS 代理失敗，啟動備用內部資料庫展示：', error);
-                        // 備用資料庫，防範政府伺服器斷線或代理伺服器忙碌，確保簡報現場絕對不掉漆
-                        csvData = [
-                            ["項次", "年度", "孔洞代碼", "縣市別", "行政區"],
-                            ["1", "112", "H-TAIPEI-001", "臺北市", "大安區"],
-                            ["2", "112", "H-TAIPEI-002", "臺北市", "信義區"],
-                            ["3", "113", "H-TAIPEI-003", "臺北市", "士林區"],
-                            ["4", "113", "H-TAIPEI-004", "臺北市", "中山區"],
-                            ["5", "113", "H-TAIPEI-005", "臺北市", "內湖區"],
-                            ["12", "113", "H-TAIPEI-012", "臺北市", "大安區"]
-                        ];
-                        setTimeout(() => {
-                            loadingStatus.classList.add('hidden');
-                            querySection.classList.remove('hidden');
-                            appendConsole('【備用資料庫載入】已成功載入模擬資料清單。', 'warning');
-                        }, 1000);
-                    }
-                } else {
-                    loadingStatus.classList.add('hidden');
-                    querySection.classList.remove('hidden');
-                    appendConsole('【系統重新就緒】歡迎繼續進行查詢。', 'success');
-                }
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                // 顯示開始下載的提示視窗
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
             });
         }
 
-        // 模擬 Python print() 將內容印到網頁終端機中
-        function appendConsole(text, type = '') {
-            const p = document.createElement('p');
-            p.className = 'mb-1 leading-relaxed font-mono';
-            if (type === 'success') p.className += ' text-green-700 font-bold';
-            if (type === 'warning') p.className += ' text-amber-700 font-bold';
-            if (type === 'input') p.className += ' text-blue-700 font-bold';
-            p.innerText = text;
-            consoleOutput.appendChild(p);
-            // 自動捲動到最下方
-            consoleOutput.scrollTop = consoleOutput.scrollHeight;
-        }
-
-        // 執行 Python 中的迴圈邏輯尋找匹配的資料
-        function executeQuery() {
-            const a = queryInput.value.trim();
-            if (!a) return;
-            
-            // 模擬畫面上顯示輸入的指令
-            appendConsole(`>>> 請輸入項次     ${a}`, 'input');
-            
-            let found = false;
-            
-            // 對應你的 Python 邏輯: for i in data: if a in i[0]:
-            for (let i of csvData) {
-                if (i[0] && i[0].includes(a)) {
-                    // 完美複製你的 Python print 格式化字串
-                    const outputText = `年度: ${i[1] || '無'}  孔洞代碼-> ${i[2] || '無'}  縣市別: ${i[3] || '無'}  行政區: ${i[4] || '無'}`;
-                    appendConsole(outputText);
-                    found = true;
-                }
-            }
-            
-            if (!found) {
-                appendConsole(`(未找到包含「${a}」的項次資料，請試試看其他關鍵字)`);
-            }
-            
-            // 清空輸入框
-            queryInput.value = '';
-            queryInput.focus();
-        }
-
-        // 綁定送出按鈕與 Enter 鍵事件
-        submitQueryBtn.addEventListener('click', executeQuery);
-        queryInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                executeQuery();
-            }
-        });
-
-        // 關閉視窗功能
-        function closeRunModal() {
-            runModal.classList.remove('flex');
-            runModal.classList.add('hidden');
+        function closeModal() {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
         }
 
         window.onload = createStars;
